@@ -25,8 +25,8 @@ def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2,
     # make environment, check spaces, get obs / act dims
     env = gym.make(env_name, render_mode="human")
 
-    obs, _ = env.reset()  
-    env.render()
+    # obs, _ = env.reset()  
+    # env.render()
 
     assert isinstance(env.observation_space, Box), \
         "This example only works for envs with continuous state spaces."
@@ -50,6 +50,10 @@ def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2,
 
     # make loss function whose gradient, for the right data, is policy gradient
     def compute_loss(obs, act, weights):
+        print('obs.shape', obs.shape)
+        print('act.shape', act.shape)
+        print('weights.shape', weights.shape)
+
         logp = get_policy(obs).log_prob(act)
         return -(logp * weights).mean()
 
@@ -136,4 +140,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     print('\nUsing simplest formulation of policy gradient.\n')
     # train(env_name=args.env_name, render=args.render, lr=args.lr)
-    train(env_name=args.env_name, render=True, lr=args.lr)
+    train(env_name=args.env_name, render=False, lr=args.lr)
