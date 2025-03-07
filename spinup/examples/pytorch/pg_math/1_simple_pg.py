@@ -1,4 +1,5 @@
 # pip install torch
+# pip install numpy
 # pip install gym
 # pip install pygame
 import torch
