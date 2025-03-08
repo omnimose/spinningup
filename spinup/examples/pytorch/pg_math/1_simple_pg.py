@@ -56,7 +56,12 @@ def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2,
         print('weights.shape', weights.shape)
 
         logp = get_policy(obs).log_prob(act)
-        return -(logp * weights).mean()
+        print('logp.shape', logp.shape)
+
+        total_weights = logp * weights
+        print('total_weights.shape', total_weights.shape)
+
+        return -(total_weights).mean()
 
     # make optimizer
     optimizer = Adam(logits_net.parameters(), lr=lr)
