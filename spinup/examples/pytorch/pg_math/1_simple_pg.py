@@ -9,19 +9,41 @@ from torch.optim import Adam
 import numpy as np
 import gym
 from gym.spaces import Discrete, Box
+import os
 
 np.bool8 = np.bool_  # Temporary fix
 
+# Checkpoint filename
+CHECKPOINT_PATH = "pg_checkpoint.pth"
+
 def mlp(sizes, activation=nn.Tanh, output_activation=nn.Identity):
-    # Build a feedforward neural network.
+    # Build a feedforward neural network.                                                                                                                       
     layers = []
     for j in range(len(sizes)-1):
         act = activation if j < len(sizes)-2 else output_activation
         layers += [nn.Linear(sizes[j], sizes[j+1]), act()]
     return nn.Sequential(*layers)
 
+def save_checkpoint(model, optimizer, epoch):
+    checkpoint = {
+        "epoch": epoch,
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+    }
+    torch.save(checkpoint, CHECKPOINT_PATH)
+    print(f"Checkpoint saved at epoch {epoch}")
+
+def load_checkpoint(model, optimizer):
+    if os.path.exists(CHECKPOINT_PATH):
+        checkpoint = torch.load(CHECKPOINT_PATH)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        print(f"Checkpoint loaded from epoch {checkpoint['epoch']}")
+        return checkpoint["epoch"]
+    return 0  # Start from scratch if no checkpoint
+
 def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2, 
-          epochs=50, batch_size=5000, render=False):
+          epochs=5000000, batch_size=5000, render=False):
 
     # make environment, check spaces, get obs / act dims
     env = gym.make(env_name, render_mode="human")
@@ -66,6 +88,9 @@ def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2,
     # make optimizer
     optimizer = Adam(logits_net.parameters(), lr=lr)
 
+     # Load checkpoint (if available)
+    start_epoch = load_checkpoint(logits_net, optimizer)
+
     # for training policy
     def train_one_epoch():
         # make some empty lists for logging.
@@ -104,6 +129,8 @@ def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2,
             if done:
                 # if episode is over, record info about episode
                 ep_ret, ep_len = sum(ep_rews), len(ep_rews)
+                print(f"episode action count: {ep_len}, episode reward: {ep_ret}")
+
                 batch_rets.append(ep_ret)
                 batch_lens.append(ep_len)
 
@@ -132,10 +159,13 @@ def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2,
         return batch_loss, batch_rets, batch_lens
 
     # training loop
-    for i in range(epochs):
+    for i in range(start_epoch, epochs):
         batch_loss, batch_rets, batch_lens = train_one_epoch()
         print('epoch: %3d \t loss: %.3f \t return: %.3f \t ep_len: %.3f'%
                 (i, batch_loss, np.mean(batch_rets), np.mean(batch_lens)))
+        
+         # Save checkpoint after each epoch
+        save_checkpoint(logits_net, optimizer, i + 1)
 
 if __name__ == '__main__':
     import argparse
