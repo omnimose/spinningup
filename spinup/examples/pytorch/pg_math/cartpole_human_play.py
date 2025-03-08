@@ -21,11 +21,12 @@ def main():
     pygame.time.delay(3000)
     
     while running:       
-        pygame.time.delay(400)
-
+        pygame.time.delay(800)
+  
         action = random.choice([0, 1])  # Default to a random action
         
         keys = pygame.key.get_pressed()
+        # print(keys)
 
         if keys[pygame.K_RIGHT]:
             print("Moving right...")
@@ -34,8 +35,8 @@ def main():
             print("Moving left...")
             action = 0  # Move left
         else:
-            print("random action")
-        
+            print("Moving random action")
+
         obs, _, done, _, _ = env.step(action)  # Step in the environment
         action_count += 1
 
