@@ -88,8 +88,8 @@ def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2,
     # make optimizer
     optimizer = Adam(logits_net.parameters(), lr=lr)
 
-     # Load checkpoint (if available)
-    # start_epoch = load_checkpoint(logits_net, optimizer)
+    # Load checkpoint (if available)
+    start_epoch = load_checkpoint(logits_net, optimizer)
 
     # for training policy
     def train_one_epoch():
