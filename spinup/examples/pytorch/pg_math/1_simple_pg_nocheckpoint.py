@@ -43,7 +43,7 @@ def load_checkpoint(model, optimizer):
     return 0  # Start from scratch if no checkpoint
 
 def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2, 
-          epochs=5000000, batch_size=5000, render=False):
+          epochs=500, batch_size=5, render=False):
 
     # make environment, check spaces, get obs / act dims
     env = gym.make(env_name, render_mode="human")
@@ -90,7 +90,7 @@ def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2,
 
      # Load checkpoint (if available)
     # start_epoch = load_checkpoint(logits_net, optimizer)
-
+    start_epoch = 0
     # for training policy
     def train_one_epoch():
         # make some empty lists for logging.
@@ -164,8 +164,8 @@ def train(env_name='CartPole-v1', hidden_sizes=[32], lr=1e-2,
         print('epoch: %3d \t loss: %.3f \t return: %.3f \t ep_len: %.3f'%
                 (i, batch_loss, np.mean(batch_rets), np.mean(batch_lens)))
         
-         # Save checkpoint after each epoch
-        save_checkpoint(logits_net, optimizer, i + 1)
+        # Save checkpoint after each epoch
+        # save_checkpoint(logits_net, optimizer, i + 1)
 
 if __name__ == '__main__':
     import argparse
